@@ -17,7 +17,7 @@ LIBS = -lglfw3dll
 SRCS = $(wildcard src/*.cpp) src/glad.c
 
 # Output executable
-TARGET = main.exe
+TARGET = CubeLogic.exe
 
 # Build target
 all: $(TARGET)
