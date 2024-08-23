@@ -6,18 +6,33 @@
 #include <sstream>
 #include <string>
 
+#include "VAO.h"
+#include "shaderClass.h"
+#include "EBO.h"
+#include "VBO.h"
+
 GLFWwindow* createWindow();
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInputs(GLFWwindow* window);
 void drawTriangle(GLuint shaderProgram, GLuint vertexbuffer);
 GLuint loadShaders(const char* vertex_shader, const char* fragment_shader);
-void cleanup(GLFWwindow* window, GLuint VAO, GLuint vertexbuffer, GLuint shaderProgram);
+void cleanup(GLFWwindow* window, GLuint VAO, GLuint vertexbuffer, GLuint EBO, GLuint shaderProgram);
 
 // triangle vertices
 static const GLfloat vertices[] = {
-    -1.0f, -1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f
+    -1.0f, -1.0f, 0.0f, // bottom left
+    1.0f, -1.0f, 0.0f, // bottom right
+    0.0f, 1.0f, 0.0f, // top middle
+    // smaller inside triangle
+    0.0f, -1.0f, 0.0f, // bottom middle
+    0.5f, 0.0f, 0.0f, // top left
+    -0.5f, 0.0f, 0.0f // top right
+};
+
+static const GLint indices[] = {
+    0, 3, 5,
+    3, 1, 4,
+    5, 4, 2
 };
 
 // settings
@@ -34,19 +49,24 @@ int main()
 
     GLuint shaderProgram = loadShaders("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
 
-    GLuint vertexbuffer, VAO;
+    GLuint vertexbuffer, VAO, EBO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-    
+
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     while(glfwWindowShouldClose(window) == 0) {
         processInputs(window);
@@ -59,7 +79,7 @@ int main()
         glfwPollEvents();
     }
 
-    cleanup(window, VAO, vertexbuffer, shaderProgram);
+    cleanup(window, VAO, vertexbuffer, EBO, shaderProgram);
     exit(EXIT_SUCCESS);
 }
 
@@ -110,15 +130,15 @@ void processInputs(GLFWwindow* window) {
     }
 }
 
-void drawTriangle(GLuint vertexbuffer) {
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+// void drawTriangle(GLuint vertexbuffer) {
+//     glEnableVertexAttribArray(0);
+//     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-    // Draws the triangle
-    glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0 -> 3
-    glDisableVertexAttribArray(0);
-}
+//     // Draws the triangle
+//     glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0); // Starting from vertex 0 -> 3
+//     glDisableVertexAttribArray(0);
+// }
 
 std::string readShaderFile(const char* filePath) {
     std::ifstream shaderFile;
@@ -160,12 +180,13 @@ GLuint loadShaders(const char* vertex_shader, const char* fragment_shader) {
 void drawTriangle(GLuint shaderProgram, GLuint VAO) {
     glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0); // Starting from vertex 0 -> 3
 }
 
-void cleanup(GLFWwindow* window, GLuint VAO, GLuint vertexbuffer, GLuint shaderProgram) {
+void cleanup(GLFWwindow* window, GLuint VAO, GLuint vertexbuffer, GLuint EBO, GLuint shaderProgram) {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &vertexbuffer);
+    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
     glfwDestroyWindow(window);
     glfwTerminate();

@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -g -std=c++17
 
 # Include directories
-INCLUDES = -Iinclude
+INCLUDES = -I"Header Files" -Iinclude
 
 # Library directories
 LDFLAGS = -Llib
