@@ -1,6 +1,7 @@
 #include "shaderClass.h"
 
 std::string get_file_contents(const char* filename) {
+    std::cout << "Trying to open file: " << filename << std::endl;
     std::ifstream in(filename, std::ios::binary);
     if (in) {
         std::string contents;
@@ -11,11 +12,13 @@ std::string get_file_contents(const char* filename) {
         in.close();
         return(contents);
     }
-    throw(errno);
+    throw std::runtime_error("Failed to open file: " + std::string(filename) + " (errno: " + std::to_string(errno) + ")");
 }
 
 Shader::Shader(const char* vertexFile, const char* fragmentFile) {
+    std::cout << "Getting vert file" << std::endl;
     std::string vertexCode = get_file_contents(vertexFile);
+    std::cout << "Getting frag file" << std::endl;
     std::string fragmentCode = get_file_contents(fragmentFile);
 
     const char* vertexSource = vertexCode.c_str();
