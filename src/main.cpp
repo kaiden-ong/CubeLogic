@@ -20,13 +20,14 @@ void cleanup(GLFWwindow* window, VAO VAO, VBO VBO, EBO EBO, Shader shaderProgram
 
 // triangle vertices
 GLfloat vertices[] = {
-    -1.0f, -1.0f, 0.0f, // bottom left
-    1.0f, -1.0f, 0.0f, // bottom right
-    0.0f, 1.0f, 0.0f, // top middle
+    // coords               // colors
+    -1.0f, -1.0f, 0.0f,     0.8f, 0.3f, 0.02f, // bottom left
+    1.0f, -1.0f, 0.0f,      0.8f, 0.3f, 0.02, // bottom right
+    0.0f, 1.0f, 0.0f,       1.0f, 0.6f, 0.32f, // top middle
     // smaller inside triangle
-    0.0f, -1.0f, 0.0f, // bottom middle
-    0.5f, 0.0f, 0.0f, // top left
-    -0.5f, 0.0f, 0.0f // top right
+    0.0f, -1.0f, 0.0f,      0.9f, 0.45f, 0.17f, // bottom middle
+    0.5f, 0.0f, 0.0f,       0.9f, 0.45f, 0.17f, // top left
+    -0.5f, 0.0f, 0.0f,      0.8f, 0.3f, 0.02f // top right
 };
 
 GLuint indices[] = {
@@ -63,7 +64,8 @@ int main()
     EBO EBO1(indices, sizeof(indices));
 
     std::cout << "Linking VBO to VAO" << std::endl;
-    VAO1.LinkVBO(VBO1, 0);
+    VAO1.LinkAttribute(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0); 
+    VAO1.LinkAttribute(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     VAO1.Unbind();
     VBO1.Unbind();
     EBO1.Unbind();
